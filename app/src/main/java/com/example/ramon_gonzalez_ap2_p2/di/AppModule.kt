@@ -9,7 +9,10 @@ import dagger.hilt.components.SingletonComponent
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import javax.inject.Singleton
-import kotlin.jvm.java
+import com.example.ramon_gonzalez_ap2_p2.data.remote.api.JugadorApi
+import com.example.ramon_gonzalez_ap2_p2.data.remote.remotedatasource.JugadorRemoteDataSource
+import com.example.ramon_gonzalez_ap2_p2.data.repository.JugadorRepositoryImpl
+import com.example.ramon_gonzalez_ap2_p2.domain.repository.JugadorRepository
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -18,10 +21,24 @@ object AppModule {
     @Singleton
     @Provides
     fun provideMoshi(): Moshi {
-        return Moshi
-            .Builder()
+        return Moshi.Builder()
             .add(KotlinJsonAdapterFactory())
             .build()
     }
 
+    @Provides
+    @Singleton
+    fun provideApi(moshi: Moshi): JugadorApi {
+        return Retrofit.Builder()
+            .baseUrl("https://gestionhuacalesapi.azurewebsites.net/")
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .build()
+            .create(JugadorApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideRepository(remoteDataSource: JugadorRemoteDataSource): JugadorRepository {
+        return JugadorRepositoryImpl(remoteDataSource)
+    }
 }
